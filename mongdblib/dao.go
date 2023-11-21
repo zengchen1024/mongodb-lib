@@ -276,6 +276,37 @@ func (impl *daoImpl) GetDocs(filter, project bson.M, result interface{}) error {
 	})
 }
 
+func (impl *daoImpl) Paginate(
+	filter, project, sortBy bson.M, pageNum, countPerPage int64, result interface{},
+) error {
+	return impl.withContext(func(ctx context.Context) error {
+		opt := &options.FindOptions{
+			Projection: project,
+		}
+
+		if countPerPage > 0 {
+			opt.Limit = &countPerPage
+
+			if pageNum > 0 {
+				if skip := (pageNum - 1) * countPerPage; skip > 0 {
+					opt.Skip = &skip
+				}
+			}
+		}
+
+		if len(sortBy) > 0 {
+			opt.Sort = sortBy
+		}
+
+		cursor, err := impl.col.Find(ctx, filter, opt)
+		if err != nil {
+			return err
+		}
+
+		return cursor.All(ctx, result)
+	})
+}
+
 func (impl *daoImpl) GetDocAndDelete(filter, project bson.M, result interface{}) error {
 	return impl.withContext(func(ctx context.Context) error {
 		var sr *mongo.SingleResult
