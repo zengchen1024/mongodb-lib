@@ -23,6 +23,7 @@ const (
 	mongoCmdEach        = "$each"
 	mongoCmdPush        = "$push"
 	mongoCmdPull        = "$pull"
+	mongoCmdRegex       = "$regex"
 	mongoCmdMatch       = "$match"
 	mongoCmdFilter      = "$filter"
 	mongoCmdProject     = "$project"
@@ -425,4 +426,14 @@ func (impl *daoImpl) DocIdsFilter(ids []string) (bson.M, error) {
 	return bson.M{
 		fieldIndex: bson.M{mongoCmdIn: oids},
 	}, nil
+}
+
+func (impl *daoImpl) LikeFilter(v string, caseInsensitive bool) bson.M {
+	m := bson.M{mongoCmdRegex: v}
+
+	if caseInsensitive {
+		m["$options"] = "i"
+	}
+
+	return m
 }
