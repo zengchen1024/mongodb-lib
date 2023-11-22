@@ -1,4 +1,4 @@
-package mongdblib
+package mongodblib
 
 import (
 	"errors"
