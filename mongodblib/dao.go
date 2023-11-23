@@ -437,3 +437,13 @@ func (impl *daoImpl) LikeFilter(v string, caseInsensitive bool) bson.M {
 
 	return m
 }
+
+func (impl *daoImpl) Count(filter bson.M) (n int64, err error) {
+	err = impl.withContext(func(ctx context.Context) error {
+		n, err = impl.col.CountDocuments(ctx, filter)
+
+		return err
+	})
+
+	return
+}
