@@ -9,7 +9,7 @@ import (
 type Config struct {
 	Conn    string `json:"conn"       required:"true"`
 	DBName  string `json:"db"         required:"true"`
-	CAFile  string `json:"ca_file"    required:"true"`
+	CAFile  string `json:"ca_file"`
 	Timeout int64  `json:"timeout"`
 }
 

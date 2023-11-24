@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"time"
 
@@ -17,28 +16,29 @@ import (
 var cli *client
 
 func Init(cfg *Config) error {
-	rootPEM, err := ioutil.ReadFile(cfg.CAFile)
-	if err != nil {
-		return err
-	}
-
-	if err1 := os.Remove(cfg.CAFile); err1 != nil {
-		return err1
-	}
-
-	roots := x509.NewCertPool()
-
-	if ok := roots.AppendCertsFromPEM([]byte(rootPEM)); !ok {
-		return fmt.Errorf("fail to get certs from %s", cfg.CAFile)
-	}
-
-	tlsConfig := &tls.Config{
-		RootCAs:            roots,
-		InsecureSkipVerify: true,
-	}
-
 	clientOpts := options.Client().ApplyURI(cfg.Conn)
-	clientOpts.SetTLSConfig(tlsConfig)
+
+	if cfg.CAFile != "" {
+		rootPEM, err := os.ReadFile(cfg.CAFile)
+		if err != nil {
+			return err
+		}
+
+		if err1 := os.Remove(cfg.CAFile); err1 != nil {
+			return err1
+		}
+
+		roots := x509.NewCertPool()
+
+		if ok := roots.AppendCertsFromPEM([]byte(rootPEM)); !ok {
+			return fmt.Errorf("fail to get certs from %s", cfg.CAFile)
+		}
+
+		clientOpts.SetTLSConfig(&tls.Config{
+			RootCAs:            roots,
+			InsecureSkipVerify: true,
+		})
+	}
 
 	c, err := mongo.Connect(context.TODO(), clientOpts)
 	if err != nil {
