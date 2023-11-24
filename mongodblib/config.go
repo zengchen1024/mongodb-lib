@@ -20,7 +20,7 @@ func (cfg *Config) SetDefault() {
 }
 
 func (cfg *Config) Validate() error {
-	if !strings.Contains(cfg.Conn, "ssl=true") {
+	if cfg.CAFile != "" && !strings.Contains(cfg.Conn, "ssl=true") {
 		return errors.New("invalid mongodb conn")
 	}
 
